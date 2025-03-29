@@ -1,0 +1,18 @@
+services:
+  whatsapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "8080:8080"
+    cpus: 2
+    mem_limit: 512m
+    environment:
+      WHATSAPP_APP_TOKEN: ${WHATSAPP_APP_TOKEN}
+    volumes:
+      - whatsapp_data:/data
+      - ./src/:/app
+
+volumes:
+  whatsapp_data:
