@@ -29,12 +29,14 @@ RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o main .
 # Prodoct Image
 FROM alpine:latest AS prod
 
-WORKDIR /root/
+WORKDIR /app/
 
 RUN apk add --no-cache sqlite
 
 COPY --from=builder /app/main .
 
 EXPOSE 8080
+
+USER 1000
 
 CMD ["./main"]
