@@ -40,7 +40,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build grafana image and push to Github Container Registry
+      - name: Build grafana whatsapp webhook image and push to Github Container Registry
         uses: docker/build-push-action@v6
         with:
           context: .
