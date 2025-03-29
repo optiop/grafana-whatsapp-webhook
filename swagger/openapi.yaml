@@ -1,0 +1,53 @@
+---
+openapi: 3.0.3
+info:
+  title: Grafana WhatsApp Webhook
+  description: This repository acts as a webhook service that listens for Grafana alerts and forwards them to a specified WhatsApp number or group. 
+  contact:
+    email: info@optiop.org
+  license:
+    name: GPL-3.0 License
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  version: v1.0.0
+externalDocs:
+  description: Check out our website for other projects.
+  url: https://optiop.org
+servers:
+  - description: Docker compose setup
+    url: http://whatsapp:8080
+  - description: Local setup
+    url: http://localhost:8080
+paths:
+  /whatsapp/send/message/:
+    post:
+      tags:
+        - whatsapp
+      summary: Send a WhatsApp message
+      description: Send a message to a specified WhatsApp number or group.
+      operationId: sendMessage
+      requestBody:
+        description: Payload containing recipient details and message content.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone_number:
+                  type: string
+                  description: The recipient's WhatsApp number.
+                message:
+                  type: string
+                  description: The message to be sent.
+              required:
+                - phone_number
+                - message
+      responses:
+        '200':
+          description: Successful operation
+        '400':
+          description: Invalid request payload
+        '404':
+          description: Recipient not found
+        '422':
+          description: Validation exception
