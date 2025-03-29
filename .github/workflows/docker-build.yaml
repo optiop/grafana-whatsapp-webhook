@@ -6,9 +6,15 @@ on:
       - main
     tags:
       - v*
+    paths:
+      - src/
+      - .github/workflows/docker-build.yaml
   pull_request:
     branches:
       - main
+    paths:
+      - src/
+      - .github/workflows/docker-build.yaml
 
 env:
   VERSION: latest
