@@ -58,6 +58,7 @@ jobs:
           platforms: linux/arm/v7,linux/arm64/v8,linux/amd64
           tags: |
             ghcr.io/${{ github.repository  }}:${{ steps.vars.outputs.sha_short }}
-            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.vars.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
