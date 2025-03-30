@@ -1,0 +1,174 @@
+apiVersion: 1
+
+groups:
+    - orgId: 1
+      name: test
+      folder: Provisioned Alerts
+      interval: 10s
+      rules:
+        - uid: test-alert-user-webhook
+          title: TestAlertWebhookUser
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: P53465F745837BCFD
+              model:
+                channel: random-2s-stream
+                csvFileName: js_libraries.csv
+                errorType: frontend_observable
+                intervalMs: 1000
+                lines: 5
+                maxDataPoints: 43200
+                nodes:
+                  type: response_small
+                refId: A
+                scenarioId: csv_metric_values
+                seriesCount: 1
+                stringInput: 3,1,2,3,34,5,3,1,2,3,21,1,20,90,30,5,5,2,1,10,3,2,3,4,4,5,5,6,6
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                  - evaluator:
+                      params: []
+                      type: gt
+                    operator:
+                      type: and
+                    query:
+                      params:
+                        - B
+                    reducer:
+                      params: []
+                      type: last
+                    type: query
+                datasource:
+                  type: __expr__
+                  uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                  - evaluator:
+                      params:
+                        - 0
+                      type: gt
+                    operator:
+                      type: and
+                    query:
+                      params:
+                        - C
+                    reducer:
+                      params: []
+                      type: last
+                    type: query
+                datasource:
+                  type: __expr__
+                  uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          annotations: {}
+          labels: {}
+          isPaused: false
+          notification_settings:
+            receiver: Webhook Contact User
+  
+    - orgId: 1
+      name: test
+      folder: Provisioned Alerts
+      interval: 10s
+      rules:
+        - uid: test-alert-group-webhook
+          title: TestAlertWebhookGroup
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: P53465F745837BCFD
+              model:
+                channel: random-2s-stream
+                csvFileName: js_libraries.csv
+                errorType: frontend_observable
+                intervalMs: 1000
+                lines: 5
+                maxDataPoints: 43200
+                nodes:
+                  type: response_small
+                refId: A
+                scenarioId: csv_metric_values
+                seriesCount: 1
+                stringInput: 3,1,2,3,34,5,3,1,2,3,21,1,20,90,30,5,5,2,1,10,3,2,3,4,4,5,5,6,6
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                  - evaluator:
+                      params: []
+                      type: gt
+                    operator:
+                      type: and
+                    query:
+                      params:
+                        - B
+                    reducer:
+                      params: []
+                      type: last
+                    type: query
+                datasource:
+                  type: __expr__
+                  uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                  - evaluator:
+                      params:
+                        - 0
+                      type: gt
+                    operator:
+                      type: and
+                    query:
+                      params:
+                        - C
+                    reducer:
+                      params: []
+                      type: last
+                    type: query
+                datasource:
+                  type: __expr__
+                  uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          annotations: {}
+          labels: {}
+          isPaused: false
+          notification_settings:
+            receiver: Webhook Contact Group
