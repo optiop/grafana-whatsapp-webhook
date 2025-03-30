@@ -73,7 +73,7 @@ func sendNewGrafanaAlertWhatsAppMessageToGroup(ws *whatsapp.WhatsappService) htt
 
 		var alert GrafanaAlert
 		if err := json.NewDecoder(r.Body).Decode(&alert); err != nil {
-			_, _ = w.Write([]byte("Error decoding alert"))
+			http.Error(w, "Error decoding alert", http.StatusBadRequest)
 			return
 		}
 
