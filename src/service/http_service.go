@@ -13,9 +13,9 @@ import (
 	"github.com/optiop/grafana-whatsapp-webhook/whatsapp"
 )
 
-var appToken = os.Getenv("APP_TOKEN")
+var appToken = os.Getenv("WHATSAPP_APP_TOKEN")
 
-func sendNewWhatsAppMessage(ws *whatsapp.WhatsappService) http.HandlerFunc {
+func sendNewGrafanaAlertWhatsAppMessageToUser(ws *whatsapp.WhatsappService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.PathValue("token")
 		if token != appToken {
@@ -23,36 +23,51 @@ func sendNewWhatsAppMessage(ws *whatsapp.WhatsappService) http.HandlerFunc {
 			return
 		}
 
-		var message entity.Message
-		if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-			_, _ = w.Write([]byte("Error decoding message"))
+		phoneNumber := r.PathValue("user_id")
+		if phoneNumber == "" {
+			http.Error(w, "phone number is required", http.StatusBadRequest)
 			return
 		}
 
-		if message.To == "" || message.Body == "" {
-			http.Error(w, "to and body are required", http.StatusBadRequest)
+		if phoneNumber[0] == '+' {
+			phoneNumber = phoneNumber[1:]
+		}
+
+		var alert GrafanaAlert
+		if err := json.NewDecoder(r.Body).Decode(&alert); err != nil {
+			_, _ = w.Write([]byte("Error decoding alert"))
 			return
 		}
 
-		if message.Type == "user" {
-			ws.SendNewWhatsAppMessageToUser(message)
-		} else if message.Type == "group" {
-			ws.SendNewWhatsAppMessageToGroup(message)
-		} else {
-			http.Error(w, "type must be user or group", http.StatusBadRequest)
+		if alert.Message == "" {
+			http.Error(w, "message is required", http.StatusBadRequest)
 			return
 		}
+
+		message := entity.Message{
+			To:   phoneNumber,
+			Type: "user",
+			Body: alert.Message,
+		}
+
+		ws.SendNewWhatsAppMessageToUser(message)
 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("Message sent to " + message.To))
 	}
 }
 
-func sendNewGrafanaAlertWhatsAppMessage(ws *whatsapp.WhatsappService) http.HandlerFunc {
+func sendNewGrafanaAlertWhatsAppMessageToGroup(ws *whatsapp.WhatsappService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.PathValue("token")
 		if token != appToken {
 			http.Error(w, "token is required", http.StatusBadRequest)
+			return
+		}
+
+		groupId := r.PathValue("group_id")
+		if groupId == "" {
+			http.Error(w, "group_id is required", http.StatusBadRequest)
 			return
 		}
 
@@ -62,28 +77,18 @@ func sendNewGrafanaAlertWhatsAppMessage(ws *whatsapp.WhatsappService) http.Handl
 			return
 		}
 
-		if alert.CommonLabels.Phone == "" {
-			http.Error(w, "phone is required", http.StatusBadRequest)
-			return
-		}
-
 		if alert.Message == "" {
 			http.Error(w, "message is required", http.StatusBadRequest)
 			return
 		}
 
-		phone := alert.CommonLabels.Phone
-		if phone[0] == '+' {
-			phone = phone[1:]
-		}
-
 		message := entity.Message{
-			To:   phone,
+			To:   groupId,
+			Type: "group",
 			Body: alert.Message,
-			Type: "user",
 		}
 
-		ws.SendNewWhatsAppMessageToUser(message)
+		ws.SendNewWhatsAppMessageToGroup(message)
 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("Message sent to " + message.To))
@@ -96,8 +101,14 @@ func Run(
 	wg *sync.WaitGroup,
 ) {
 	httpMux := http.NewServeMux()
-	httpMux.HandleFunc("POST /whatsapp/send/message/{token}", sendNewWhatsAppMessage(ws))
-	httpMux.HandleFunc("POST /whatsapp/send/grafana-alert/{token}", sendNewGrafanaAlertWhatsAppMessage(ws))
+
+	httpMux.HandleFunc("GET /healthy", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+	})
+
+	httpMux.HandleFunc("POST /whatsapp/send/grafana-alert/user/{user_id}/{token}", sendNewGrafanaAlertWhatsAppMessageToUser(ws))
+	httpMux.HandleFunc("POST /whatsapp/send/grafana-alert/group/{group_id}/{token}", sendNewGrafanaAlertWhatsAppMessageToGroup(ws))
 
 	server := &http.Server{
 		Addr:    ":8080",
