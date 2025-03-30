@@ -31,7 +31,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set outputs
-        id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Login to Github Container Registry
