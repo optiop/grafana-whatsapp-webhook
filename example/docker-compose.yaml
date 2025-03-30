@@ -1,0 +1,30 @@
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - WHATSAPP_APP_TOKEN=${WHATSAPP_APP_TOKEN}
+      - WHATSAPP_USER_ID=${WHATSAPP_USER_ID}
+      - WHATSAPP_GROUP_ID=${WHATSAPP_GROUP_ID}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+
+  whatsapp_service:
+    image: ghcr.io/optiop/grafana-whatsapp-webhook:latest
+    restart: unless-stopped
+    user: root
+    ports:
+      - 8080:8080
+    volumes:
+      - whatsapp_service_data:/app/data/
+      - ./out:/app/out
+    environment:
+      - WHATSAPP_APP_TOKEN=${WHATSAPP_APP_TOKEN}
+
+volumes:
+  grafana_data:
+  whatsapp_service_data:
