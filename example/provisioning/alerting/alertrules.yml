@@ -92,7 +92,7 @@ groups:
       folder: Provisioned Alerts
       interval: 10s
       rules:
-        - uid: test-alert-grup-webhook
+        - uid: test-alert-group-webhook
           title: TestAlertWebhookGroup
           condition: C
           data:
