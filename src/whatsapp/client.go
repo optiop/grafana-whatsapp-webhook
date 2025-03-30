@@ -106,7 +106,12 @@ func (ws *WhatsappService) setupWhatsappService(
 		for evt := range qrChan {
 			if evt.Event == "code" {
 				qrterminal.GenerateHalfBlock(evt.Code, qrterminal.L, os.Stdout)
-				err := qrcode.WriteFile(evt.Code, qrcode.Medium, 256, "qr.png")
+				if _, err := os.Stat("out"); errors.Is(err, os.ErrNotExist) {
+					if err := os.Mkdir("out", os.ModePerm); err != nil && !os.IsExist(err) {
+						log.Println("Error creating 'out' directory: ", err)
+					}
+				}
+				err := qrcode.WriteFile(evt.Code, qrcode.Medium, 256, "out/qr.png")
 				if err != nil {
 					log.Println("Error: to create qr code png file: ", err)
 				}
