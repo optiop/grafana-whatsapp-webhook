@@ -54,8 +54,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name == 'push' &&
-            github.ref == 'refs/heads/main' }}
+          push: ${{ (github.event_name == 'push' &&
+            github.ref == 'refs/heads/main') || 
+            github.ref_type == 'tag' }} 
           platforms: linux/arm/v7,linux/arm64/v8,linux/amd64
           tags: |
             ghcr.io/${{ github.repository  }}:${{ steps.vars.outputs.sha_short }}
