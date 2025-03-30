@@ -1,5 +1,5 @@
 ---
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Grafana WhatsApp Webhook
   description: This repository acts as a webhook service that listens for Grafana alerts and forwards them to a specified WhatsApp number or group. 
@@ -13,41 +13,148 @@ externalDocs:
   description: Check out our website for other projects.
   url: https://optiop.org
 servers:
-  - description: Docker compose setup
-    url: http://whatsapp:8080
   - description: Local setup
     url: http://localhost:8080
+  - description: Docker compose setup
+    url: http://whatsapp:8080
 paths:
-  /whatsapp/send/message/:
+  /healthy:
+    get:
+      tags:
+        - health
+      summary: Health check endpoint
+      description: Check if the service is healthy and running
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "OK"
+  /whatsapp/send/grafana-alert/user/{user_id}/{token}:
     post:
       tags:
         - whatsapp
-      summary: Send a WhatsApp message
-      description: Send a message to a specified WhatsApp number or group.
-      operationId: sendMessage
+      summary: Send a Grafana alert to a WhatsApp user
+      description: Send a Grafana alert message to a specified WhatsApp user number.
+      operationId: sendGrafanaAlertToUser
+      parameters:
+        - name: user_id
+          in: path
+          description: The recipient's WhatsApp number (with or without + prefix)
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: path
+          description: Authentication token (must match WHATSAPP_APP_TOKEN environment variable)
+          required: true
+          schema:
+            type: string
       requestBody:
-        description: Payload containing recipient details and message content.
+        description: Grafana alert payload
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                phone_number:
-                  type: string
-                  description: The recipient's WhatsApp number.
-                message:
-                  type: string
-                  description: The message to be sent.
-              required:
-                - phone_number
-                - message
+              $ref: '#/components/schemas/GrafanaAlert'
       responses:
         '200':
           description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Message sent to 123456789"
         '400':
-          description: Invalid request payload
-        '404':
-          description: Recipient not found
-        '422':
-          description: Validation exception
+          description: Bad request (missing token, phone number, or message)
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Invalid token
+  /whatsapp/send/grafana-alert/group/{group_id}/{token}:
+    post:
+      tags:
+        - whatsapp
+      summary: Send a Grafana alert to a WhatsApp group
+      description: Send a Grafana alert message to a specified WhatsApp group.
+      operationId: sendGrafanaAlertToGroup
+      parameters:
+        - name: group_id
+          in: path
+          description: The WhatsApp group ID to send the message to
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: path
+          description: Authentication token (must match WHATSAPP_APP_TOKEN environment variable)
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Grafana alert payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrafanaAlert'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Message sent to group123456"
+        '400':
+          description: Bad request (missing token, group ID, or message)
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Invalid token
+components:
+  schemas:
+    CommonLabels:
+      type: object
+      properties:
+        alertname:
+          type: string
+          description: The name of the alert
+        grafana_folder:
+          type: string
+          description: The Grafana folder containing the alert
+        phone:
+          type: string
+          description: Phone number metadata
+        ref_id:
+          type: string
+          description: Reference ID
+    GrafanaAlert:
+      type: object
+      properties:
+        receiver:
+          type: string
+          description: The name of the alert receiver
+        status:
+          type: string
+          description: The status of the alert
+        commonLabels:
+          $ref: '#/components/schemas/CommonLabels'
+        state:
+          type: string
+          description: The state of the alert
+        title:
+          type: string
+          description: The title of the alert
+        message:
+          type: string
+          description: The message content of the alert
+      required:
+        - message
