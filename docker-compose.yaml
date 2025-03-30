@@ -14,5 +14,14 @@ services:
       - whatsapp_data:/data
       - ./src/:/app
 
+  swagger:
+    image: swaggerapi/swagger-ui
+    volumes:
+      - ./swagger/openapi.yaml:/mnt/openapi.yaml
+    environment:
+      SWAGGER_JSON: /mnt/openapi.yaml
+    ports:
+      - 8000:8080
+
 volumes:
   whatsapp_data:
