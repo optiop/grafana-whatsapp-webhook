@@ -10,7 +10,7 @@ on:
     branches:
       - main
     paths:
-      - src/
+      - pkg/
       - .github/workflows/docker-build.yaml
 
 env:

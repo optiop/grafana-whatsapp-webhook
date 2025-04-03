@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/optiop/grafana-whatsapp-webhook/entity"
-	"github.com/optiop/grafana-whatsapp-webhook/whatsapp"
+	"github.com/optiop/grafana-whatsapp-webhook/pkg/entity"
+	"github.com/optiop/grafana-whatsapp-webhook/pkg/whatsapp"
 )
 
 var appToken = os.Getenv("WHATSAPP_APP_TOKEN")
@@ -109,7 +109,7 @@ func Run(
 
 	httpMux.HandleFunc("POST /whatsapp/send/grafana-alert/user/{user_id}/{token}", sendNewGrafanaAlertWhatsAppMessageToUser(ws))
 	httpMux.HandleFunc("POST /whatsapp/send/grafana-alert/group/{group_id}/{token}", sendNewGrafanaAlertWhatsAppMessageToGroup(ws))
-	
+
 	// Apply CORS middleware for all routes
 	corsMiddleware := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
