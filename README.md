@@ -1,4 +1,6 @@
 # Grafana Whatsapp Webhook
+[![Go Report Card](https://goreportcard.com/badge/github.com/optiop/grafana-whatsapp-webhook)](https://goreportcard.com/report/github.com/optiop/grafana-whatsapp-webhook)
+[![Slack Community](https://badgen.net/badge/icon/slack?icon=slack&label)](https://join.slack.com/t/optioporg/shared_invite/zt-33axtzuao-Kd5NzaVm2GOhozBHOTj_Yg)
 
 This repository acts as a webhook service that listens for Grafana alerts 
 and forwards them to a specified WhatsApp number or group. It enables 
