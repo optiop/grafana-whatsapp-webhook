@@ -24,7 +24,7 @@ Use the following command to start the service with Docker:
 docker run -p 8080:8080 \
   -e WHATSAPP_APP_TOKEN=your_generated_token \
   --rm -v ./out:/app/out/ \
-  -d ghcr.io/optiop/grafana-whatsapp-webhook:latest
+  -d ghcr.io/optiop/grafana-whatsapp-webhook:v0.1.5
 ```
 
 ### 4. Authenticate with WhatsApp
