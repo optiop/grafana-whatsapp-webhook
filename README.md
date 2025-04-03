@@ -22,7 +22,7 @@ PHONE_NUMBER=your_phone_number_without_plus
 Use the following command to start the service with Docker:
 ```bash
 docker run -p 8080:8080 \
-  -e WHATSAPP_APP_TOKEN=your_generated_token \
+  --env-file .env.example  \
   -name grafana-whatsapp-webhook \
   --rm -v ./out:/app/out/ \
   -d ghcr.io/optiop/grafana-whatsapp-webhook:v0.1.5
