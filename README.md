@@ -33,7 +33,7 @@ docker run -p 8080:8080 \
   - A QR code will be generated and saved into the `./out/qr.png` directory.
   - Alternatively, you can retrieve the QR code using:
     ```bash
-    docker logs <container_name>
+    docker logs grafana-whatsapp-webhook
     ```
 
 - **Link Device:**
