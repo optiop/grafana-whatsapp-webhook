@@ -11,7 +11,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/mdp/qrterminal"
-	"github.com/optiop/grafana-whatsapp-webhook/entity"
+	"github.com/optiop/grafana-whatsapp-webhook/pkg/entity"
 	"github.com/skip2/go-qrcode"
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/proto/waE2E"

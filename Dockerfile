@@ -6,7 +6,7 @@ WORKDIR /app
 
 RUN apk add --no-cache make gcc git sqlite-dev musl-dev
 
-COPY ./src/go.mod ./src/go.sum /app/
+COPY ./go.mod ./go.sum /app/
 
 RUN go mod download
 
@@ -22,7 +22,7 @@ CMD ["air"]
 # Builder image
 FROM baseimage AS builder
 
-COPY src/ .
+COPY pkg/ .
 
 RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o main .
 
