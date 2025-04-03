@@ -44,7 +44,7 @@ docker run -p 8080:8080 \
 ### 5. Retrieve the Group JID (for Group Alerts)
 Once authentication is complete, stream logs to retrieve the WhatsApp **Group JID**:
 ```bash
-docker logs -f <container_name>
+docker logs -f grafana-whatsapp-webhook
 ```
 Copy the **JID** of the group where you want to send alerts 
 **only the number not @g.us or something else**.
