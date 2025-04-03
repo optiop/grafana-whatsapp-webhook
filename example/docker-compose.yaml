@@ -2,6 +2,9 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
+    hostname: grafana
+    networks:
+      - app_net
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - WHATSAPP_APP_TOKEN=${WHATSAPP_APP_TOKEN}
@@ -17,13 +20,21 @@ services:
     image: ghcr.io/optiop/grafana-whatsapp-webhook:latest
     restart: unless-stopped
     user: root
+    hostname: webhook
     ports:
       - 8080:8080
+    networks:
+      - app_net
     volumes:
       - whatsapp_service_data:/app/data/
       - ./out:/app/out
     environment:
       - WHATSAPP_APP_TOKEN=${WHATSAPP_APP_TOKEN}
+
+networks:
+  app_net:
+    driver: bridge
+
 
 volumes:
   grafana_data:
