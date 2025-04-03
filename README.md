@@ -39,7 +39,7 @@ docker run -p 8080:8080 \
 - **Link Device:**
   - Open WhatsApp, go to **Linked Devices**, and select **Link a Device**.
   - Scan the QR code from `./out/qr.png`.
-  - Or use `docker logs <container name>`
+  - Or use `docker logs grafana-whatsapp-webhook`
 
 ### 5. Retrieve the Group JID (for Group Alerts)
 Once authentication is complete, stream logs to retrieve the WhatsApp **Group JID**:
