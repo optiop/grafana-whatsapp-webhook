@@ -22,12 +22,13 @@ CMD ["air"]
 # Builder image
 FROM baseimage AS builder
 
-COPY pkg/ .
+COPY pkg/ /app/pkg/
+COPY main.go /app/
 
 RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o main .
 
 # Prodoct Image
-FROM alpine:latest AS prod
+FROM alpine:3.21 AS prod
 
 WORKDIR /app/
 
