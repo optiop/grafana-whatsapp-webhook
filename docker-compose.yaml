@@ -9,10 +9,10 @@ services:
     cpus: 2
     mem_limit: 512m
     environment:
-      WHATSAPP_APP_TOKEN: ${WHATSAPP_APP_TOKEN}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET}
     volumes:
-      - whatsapp_data:/data
-      - ./src/:/app
+      - whatsapp_data:/app/data
+      - ./:/app
 
   swagger:
     image: swaggerapi/swagger-ui

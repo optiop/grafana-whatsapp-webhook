@@ -17,7 +17,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	wg.Add(2)
+	wg.Add(3)
 	ws := whatsapp.New(ctx, &wg)
 	service.Run(ctx, ws, &wg)
 

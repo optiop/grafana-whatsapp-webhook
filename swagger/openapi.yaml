@@ -2,7 +2,7 @@
 openapi: 3.1.0
 info:
   title: Grafana WhatsApp Webhook
-  description: This repository acts as a webhook service that listens for Grafana alerts and forwards them to a specified WhatsApp number or group. 
+  description: This repository acts as a webhook service that listens for Grafana alerts and forwards them to a specified WhatsApp number or group.
   contact:
     email: info@optiop.org
   license:
@@ -33,23 +33,19 @@ paths:
               schema:
                 type: string
                 example: "OK"
-  /whatsapp/send/grafana-alert/user/{user_id}/{token}:
+  /whatsapp/send/grafana-alert/user/{user_id}:
     post:
       tags:
         - whatsapp
       summary: Send a Grafana alert to a WhatsApp user
       description: Send a Grafana alert message to a specified WhatsApp user number.
       operationId: sendGrafanaAlertToUser
+      security:
+        - bearerAuth: []
       parameters:
         - name: user_id
           in: path
           description: The recipient's WhatsApp number (with or without + prefix)
-          required: true
-          schema:
-            type: string
-        - name: token
-          in: path
-          description: Authentication token (must match WHATSAPP_APP_TOKEN environment variable)
           required: true
           schema:
             type: string
@@ -69,30 +65,26 @@ paths:
                 type: string
                 example: "Message sent to 123456789"
         '400':
-          description: Bad request (missing token, phone number, or message)
+          description: Bad request (missing phone number or message)
           content:
             text/plain:
               schema:
                 type: string
         '401':
-          description: Invalid token
-  /whatsapp/send/grafana-alert/group/{group_id}/{token}:
+          description: Missing or invalid Authorization header
+  /whatsapp/send/grafana-alert/group/{group_id}:
     post:
       tags:
         - whatsapp
       summary: Send a Grafana alert to a WhatsApp group
       description: Send a Grafana alert message to a specified WhatsApp group.
       operationId: sendGrafanaAlertToGroup
+      security:
+        - bearerAuth: []
       parameters:
         - name: group_id
           in: path
           description: The WhatsApp group ID to send the message to
-          required: true
-          schema:
-            type: string
-        - name: token
-          in: path
-          description: Authentication token (must match WHATSAPP_APP_TOKEN environment variable)
           required: true
           schema:
             type: string
@@ -112,14 +104,19 @@ paths:
                 type: string
                 example: "Message sent to group123456"
         '400':
-          description: Bad request (missing token, group ID, or message)
+          description: Bad request (missing group ID or message)
           content:
             text/plain:
               schema:
                 type: string
         '401':
-          description: Invalid token
+          description: Missing or invalid Authorization header
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Set WEBHOOK_SECRET as the bearer token value
   schemas:
     CommonLabels:
       type: object
