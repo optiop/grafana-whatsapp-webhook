@@ -1,5 +1,9 @@
 .env
-.env.example
 *.db
-tmp
-.air
+data/
+out/
+tmp/
+.air.toml
+.git/
+images/
+example/

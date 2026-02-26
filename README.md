@@ -7,62 +7,70 @@ This repository acts as a webhook service that listens for Grafana alerts and fo
 
 ## Setup and Usage
 
-### 1. Generate a Random Token
-Before using this repository, **generate a random token** using only numbers and alphabets. This token is **user-generated** and not an actual Meta token.
+### 1. Generate a Secret Token
+Before using this service, **generate a secret token**. This is a user-defined value used to authenticate incoming webhook requests — it is **not** a Meta or WhatsApp API token.
 
 ### 2. Configure the `.env` File
-Create or edit the `.env` file and add the following values:
+Copy `.env.example` to `.env` and fill in your values:
 ```
-WHATSAPP_APP_TOKEN=your_generated_token
-PHONE_NUMBER=your_phone_number_without_plus
+WEBHOOK_SECRET=your_generated_secret
+WHATSAPP_USER_ID=your_phone_number_without_plus
+WHATSAPP_GROUP_ID=your_group_jid
 ```
-> **Note:** Ensure the phone number is added **without the `+` sign** for the country code.
+> **Note:** The phone number must be entered **without the `+` sign**.
 
 ### 3. Run the Docker Container
-Use the following command to start the service with Docker:
 ```bash
 docker run -p 8080:8080 \
-  --env-file .env.example  \
-  -name grafana-whatsapp-webhook \
-  --rm -v ./out:/app/out/ \
-  -d ghcr.io/optiop/grafana-whatsapp-webhook:v0.1.5
+  --env-file .env \
+  --name grafana-whatsapp-webhook \
+  --rm \
+  -v ./data:/app/data \
+  -v ./out:/app/out \
+  -d ghcr.io/optiop/grafana-whatsapp-webhook:latest
 ```
+
+> The `-v ./data:/app/data` mount persists your WhatsApp session so you don't need to re-authenticate after a restart.
 
 ### 4. Authenticate with WhatsApp
 - **QR Code Generation:**
-  - A QR code will be generated and saved into the `./out/qr.png` directory.
-  - Alternatively, you can retrieve the QR code using:
+  - A QR code will be generated and saved to `./out/qr.png`.
+  - Alternatively, retrieve it from the container logs:
     ```bash
     docker logs grafana-whatsapp-webhook
     ```
 
 - **Link Device:**
   - Open WhatsApp, go to **Linked Devices**, and select **Link a Device**.
-  - Scan the QR code from `./out/qr.png`.
-  - Or use `docker logs grafana-whatsapp-webhook`
+  - Scan the QR code from `./out/qr.png` or from the logs.
 
 ### 5. Retrieve the Group JID (for Group Alerts)
 Once authentication is complete, stream logs to retrieve the WhatsApp **Group JID**:
 ```bash
 docker logs -f grafana-whatsapp-webhook
 ```
-Copy the **JID** of the group where you want to send alerts 
-**only the number not @g.us or something else**.
+Copy the **JID** of the group where you want to send alerts —
+**use only the number, not the `@g.us` suffix**.
 
-**in this example ![Scan QR Code](images/jid.png) 120363400930729957 is the group id for our .env file**
+**In this example ![Scan QR Code](images/jid.png) `120363400930729957` is the group ID.**
+
 ### 6. Configure Grafana Contact Points
-Set up a **contact point** in Grafana using the following URLs:
+Set up a **contact point** in Grafana with the following settings:
 
 - **For a user:**
-  ```
-  http://<your_ip>:8080/whatsapp/send/grafana-alert/user/<phone_number>/<WHATSAPP_APP_TOKEN>
-  ```
+  - URL: `http://<your_ip>:8080/whatsapp/send/grafana-alert/user/<phone_number>`
+  - HTTP Method: POST
+  - Authorization Header - Scheme: `Bearer`
+  - Authorization Header - Credentials: `<WEBHOOK_SECRET>`
 
 - **For a group:**
-  ```
-  http://<your_ip>:8080/whatsapp/send/grafana-alert/group/<group_id>/<WHATSAPP_APP_TOKEN>
-  ```
-Replace `<your_ip>`, `<phone_number>`, `<group_id>`, and `<WHATSAPP_APP_TOKEN>` with your actual values **do not use localhost or 127.0.0.1 use the ip of your pc**.
+  - URL: `http://<your_ip>:8080/whatsapp/send/grafana-alert/group/<group_id>`
+  - HTTP Method: POST
+  - Authorization Header - Scheme: `Bearer`
+  - Authorization Header - Credentials: `<WEBHOOK_SECRET>`
+
+Replace `<your_ip>`, `<phone_number>`, `<group_id>`, and `<WEBHOOK_SECRET>` with your actual values.
+
+> **Note:** Do not use `localhost` or `127.0.0.1` — use the actual IP address of your machine.
 
 > **⚠️ WARNING:** If you stop using this service, **unlink the device from WhatsApp** to maintain your account's security.
-

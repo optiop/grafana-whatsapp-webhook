@@ -7,7 +7,7 @@ services:
       - app_net
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
-      - WHATSAPP_APP_TOKEN=${WHATSAPP_APP_TOKEN}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
       - WHATSAPP_USER_ID=${WHATSAPP_USER_ID}
       - WHATSAPP_GROUP_ID=${WHATSAPP_GROUP_ID}
     volumes:
@@ -29,7 +29,7 @@ services:
       - whatsapp_service_data:/app/data/
       - ./out:/app/out
     environment:
-      - WHATSAPP_APP_TOKEN=${WHATSAPP_APP_TOKEN}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
 
 networks:
   app_net:

@@ -83,18 +83,28 @@ func (ws *WhatsappService) setupWhatsappService(
 	}
 
 	dbLog := waLog.Stdout("Database", level, true)
-	container, err := sqlstore.New("sqlite3", "data/sqlite3.db?_foreign_keys=on", dbLog)
+	container, err := sqlstore.New(ctx, "sqlite3", "data/sqlite3.db?_foreign_keys=on", dbLog)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	deviceStore, err := container.GetFirstDevice()
+	deviceStore, err := container.GetFirstDevice(ctx)
 	if err != nil {
 		log.Panic(err)
 	}
 
 	clientLog := waLog.Stdout("Client", level, true)
 	client := whatsmeow.NewClient(deviceStore, clientLog)
+
+	// connectedCh is closed on the first events.Connected, signalling that the
+	// WebSocket handshake (including any 515 server-redirect reconnect) is done.
+	connectedCh := make(chan struct{})
+	var connectedOnce sync.Once
+	client.AddEventHandler(func(evt any) {
+		if _, ok := evt.(*events.Connected); ok {
+			connectedOnce.Do(func() { close(connectedCh) })
+		}
+	})
 	client.AddEventHandler(ws.eventHandler)
 
 	if client.Store.ID == nil {
@@ -126,7 +136,15 @@ func (ws *WhatsappService) setupWhatsappService(
 		}
 	}
 
-	groups, err := client.GetJoinedGroups()
+	// Wait until the connection is fully established before querying groups.
+	// This handles the 515 server-redirect reconnect that happens after pairing.
+	select {
+	case <-connectedCh:
+	case <-ctx.Done():
+		return
+	}
+
+	groups, err := client.GetJoinedGroups(ctx)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -138,11 +156,11 @@ func (ws *WhatsappService) setupWhatsappService(
 		log.Println("----------------")
 	}
 
-	go ws.handelSendUserMessages(ctx)
-	go ws.handelSendGroupMessages(ctx)
-	go ws.disconnect(ctx, wg)
-
 	ws.client = client
+
+	go ws.handleSendUserMessages(ctx)
+	go ws.handleSendGroupMessages(ctx)
+	go ws.disconnect(ctx, wg)
 }
 
 func (ws *WhatsappService) SendNewWhatsAppMessageToUser(msg entity.Message) {
@@ -153,7 +171,7 @@ func (ws *WhatsappService) SendNewWhatsAppMessageToGroup(msg entity.Message) {
 	ws.cGroupMessage <- msg
 }
 
-func (ws *WhatsappService) handelSendUserMessages(ctx context.Context) {
+func (ws *WhatsappService) handleSendUserMessages(ctx context.Context) {
 	for msg := range ws.cUserMessage {
 		to := types.NewJID(msg.To, "s.whatsapp.net")
 		message := &waE2E.Message{
@@ -164,12 +182,12 @@ func (ws *WhatsappService) handelSendUserMessages(ctx context.Context) {
 
 		_, err := ws.client.SendMessage(ctx, to, message)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("failed to send user message to %s: %v", msg.To, err)
 		}
 	}
 }
 
-func (ws *WhatsappService) handelSendGroupMessages(ctx context.Context) {
+func (ws *WhatsappService) handleSendGroupMessages(ctx context.Context) {
 	for msg := range ws.cGroupMessage {
 		groupJID := types.NewJID(msg.To, "g.us")
 		message := &waE2E.Message{
@@ -180,7 +198,7 @@ func (ws *WhatsappService) handelSendGroupMessages(ctx context.Context) {
 
 		_, err := ws.client.SendMessage(ctx, groupJID, message)
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("failed to send group message to %s: %v", msg.To, err)
 		}
 	}
 }

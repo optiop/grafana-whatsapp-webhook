@@ -1,6 +1,6 @@
 
 # Base image for development
-FROM golang:1.23-alpine AS baseimage
+FROM golang:1.25-alpine AS baseimage
 
 WORKDIR /app
 

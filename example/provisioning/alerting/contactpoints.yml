@@ -7,8 +7,10 @@ contactPoints:
       - uid: "webhook_contact_user"
         type: "webhook"
         settings:
-          url: "http://webhook:8080/whatsapp/send/grafana-alert/user/${WHATSAPP_USER_ID}/${WHATSAPP_APP_TOKEN}"
+          url: "http://webhook:8080/whatsapp/send/grafana-alert/user/${WHATSAPP_USER_ID}"
           httpMethod: "POST"
+          authorization_scheme: "Bearer"
+          authorization_credentials: "${WEBHOOK_SECRET}"
           disableTlsVerify: false
 
   - orgId: 1
@@ -17,6 +19,8 @@ contactPoints:
       - uid: "webhook_contact_group"
         type: "webhook"
         settings:
-          url: "http://webhook:8080/whatsapp/send/grafana-alert/group/${WHATSAPP_GROUP_ID}/${WHATSAPP_APP_TOKEN}"
+          url: "http://webhook:8080/whatsapp/send/grafana-alert/group/${WHATSAPP_GROUP_ID}"
           httpMethod: "POST"
+          authorization_scheme: "Bearer"
+          authorization_credentials: "${WEBHOOK_SECRET}"
           disableTlsVerify: false

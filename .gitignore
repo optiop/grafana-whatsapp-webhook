@@ -25,14 +25,12 @@ go.work.sum
 # env file
 .env
 
-# whats app database
+# whatsapp session database
 *.db
+data/
 
-# air temp file
-tmp
-
-# air temp folder
+# air temp files
 tmp/
 
-# Qr code png file
-qr.png
+# QR code output
+out/
